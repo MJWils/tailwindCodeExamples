@@ -1,9 +1,9 @@
-import Dropdown from "./Dropdown";
+import MultiStepForm from "./MultiStepForm";
 
 function App() {
   return (
     <>
-      <Dropdown />
+      <MultiStepForm />
     </>
   );
 }
