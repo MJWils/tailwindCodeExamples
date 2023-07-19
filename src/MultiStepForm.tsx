@@ -1,17 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, ChangeEvent } from "react";
+import Step from "./Step";
 
-const MultiStepForm = () => {
-  const [formData, setFormData] = useState({
+interface FormData {
+  step1: string;
+  step2: string;
+  step3: string;
+}
+
+const MultiStepForm: React.FC = () => {
+  const [formData, setFormData] = useState<FormData>({
     step1: "",
     step2: "",
     step3: "",
   });
 
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const jsArray = [
+    {
+      name: "a1",
+      obj: [
+        { nestedName: "aa1", times: [123, 456, 789] },
+        { nestedName: "aa2", times: [123, 456, 789] },
+      ],
+    },
+    {
+      name: "b1",
+      obj: [
+        { nestedName: "bb1", times: [123, 456, 789] },
+        { nestedName: "bb2", times: [123, 456, 789] },
+      ],
+    },
+    {
+      name: "c1",
+      obj: [
+        { nestedName: "cc1", times: [123, 456, 789] },
+        { nestedName: "cc2", times: [123, 456, 789] },
+      ],
+    },
+  ];
+
+  const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const step = e.target.name;
+    const value = e.target.value;
+
+    setFormData((prevState) => ({
+      ...prevState,
+      [step]: value,
+      ...(step === "step1" && { step2: "", step3: "" }),
+      ...(step === "step2" && { step3: "" }),
+    }));
   };
 
   const allStepsCompleted = Object.values(formData).every(
@@ -23,53 +59,42 @@ const MultiStepForm = () => {
       <div className="p-8 bg-white rounded shadow-md w-96">
         <h2 className="text-2xl font-bold mb-6">Multi-Step Form</h2>
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Step 1</label>
-          <select
-            name="step1"
-            value={formData.step1}
-            onChange={handleInputChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-            disabled={false}
-          >
-            <option value="">Select...</option>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-          </select>
-        </div>
+        <Step
+          stepNumber={1}
+          value={formData.step1}
+          onChange={handleInputChange}
+          disabled={false}
+          options={jsArray.map((item) => item.name)}
+        />
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Step 2</label>
-          <select
-            name="step2"
-            value={formData.step2}
-            onChange={handleInputChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-            disabled={!formData.step1}
-          >
-            <option value="">Select...</option>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-          </select>
-        </div>
+        <Step
+          stepNumber={2}
+          value={formData.step2}
+          onChange={handleInputChange}
+          disabled={!formData.step1}
+          options={
+            formData.step1
+              ? jsArray
+                  .find((item) => item.name === formData.step1)
+                  ?.obj.map((o) => o.nestedName) || []
+              : []
+          }
+        />
 
-        <div className="mb-4">
-          <label className="block text-gray-700">Step 3</label>
-          <select
-            name="step3"
-            value={formData.step3}
-            onChange={handleInputChange}
-            className="mt-1 p-2 w-full border border-gray-300 rounded"
-            disabled={!formData.step2}
-          >
-            <option value="">Select...</option>
-            <option value="option1">Option 1</option>
-            <option value="option2">Option 2</option>
-            <option value="option3">Option 3</option>
-          </select>
-        </div>
+        <Step
+          stepNumber={3}
+          value={formData.step3}
+          onChange={handleInputChange}
+          disabled={!formData.step2}
+          options={
+            formData.step2
+              ? jsArray
+                  .find((item) => item.name === formData.step1)
+                  ?.obj.find((o) => o.nestedName === formData.step2)?.times ||
+                []
+              : []
+          }
+        />
 
         {allStepsCompleted && (
           <button className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
