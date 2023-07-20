@@ -13,6 +13,7 @@ const MultiStepForm: React.FC = () => {
     step2: "",
     step3: "",
   });
+  const [imageSrc, setImageSrc] = useState<string>("");
 
   const jsArray = [
     {
@@ -37,6 +38,19 @@ const MultiStepForm: React.FC = () => {
       ],
     },
   ];
+
+  const handleRequestImage = async () => {
+    try {
+      // Replace with your actual API endpoint
+      const response = await fetch(
+        `/api/images?step1=${formData.step1}&step2=${formData.step2}&step3=${formData.step3}`
+      );
+      const blob = await response.blob();
+      setImageSrc(URL.createObjectURL(blob));
+    } catch (error) {
+      console.error("Failed to fetch image:", error);
+    }
+  };
 
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const step = e.target.name;
@@ -97,10 +111,15 @@ const MultiStepForm: React.FC = () => {
         />
 
         {allStepsCompleted && (
-          <button className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700">
+          <button
+            onClick={handleRequestImage}
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
             Request Image
           </button>
         )}
+
+        {imageSrc && <img src={imageSrc} alt="Requested" />}
       </div>
     </div>
   );
