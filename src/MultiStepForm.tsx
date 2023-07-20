@@ -64,6 +64,15 @@ const MultiStepForm: React.FC = () => {
     }));
   };
 
+  const handleReset = () => {
+    setFormData({
+      step1: "",
+      step2: "",
+      step3: "",
+    });
+    setImageSrc("");
+  };
+
   const allStepsCompleted = Object.values(formData).every(
     (field) => field !== ""
   );
@@ -111,15 +120,25 @@ const MultiStepForm: React.FC = () => {
         />
 
         {allStepsCompleted && (
-          <button
-            onClick={handleRequestImage}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Request Image
-          </button>
+          <div className="flex justify-between">
+            <button
+              onClick={handleRequestImage}
+              className="py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Request Image
+            </button>
+            <button
+              onClick={handleReset}
+              className="py-2 px-4 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Reset
+            </button>
+          </div>
         )}
 
-        {imageSrc && <img src={imageSrc} alt="Requested" />}
+        {imageSrc && (
+          <img src={imageSrc} alt="Requested" className="absolute right-0" />
+        )}
       </div>
     </div>
   );
