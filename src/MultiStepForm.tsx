@@ -53,15 +53,30 @@ const MultiStepForm: React.FC = () => {
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const step = e.target.name;
+    const step = e.target.name as Steps;
     const value = e.target.value;
 
-    setFormData((prevState) => ({
-      ...prevState,
-      [step]: value,
-      ...(step === "step1" && { step2: "", step3: "" }),
-      ...(step === "step2" && { step3: "" }),
-    }));
+    setFormData((prevState) => {
+      let updatedState = {
+        ...prevState,
+        [step]: value,
+      };
+
+      if (step === Steps.STEP1) {
+        updatedState = {
+          ...updatedState,
+          [Steps.STEP2]: "",
+          [Steps.STEP3]: "",
+        };
+      } else if (step === Steps.STEP2) {
+        updatedState = {
+          ...updatedState,
+          [Steps.STEP3]: "",
+        };
+      }
+
+      return updatedState;
+    });
   };
 
   const handleReset = () => {
@@ -71,6 +86,34 @@ const MultiStepForm: React.FC = () => {
       step3: "",
     });
     setImageSrc("");
+  };
+  const getOptions = (
+    stepNumber: number,
+    previousSelection: string,
+    property: string
+  ) => {
+    if (!previousSelection) {
+      return [];
+    }
+
+    const item = jsArray.find((item) => item.name === previousSelection);
+    console.log("item", item);
+    if (!item) {
+      return [];
+    }
+
+    if (stepNumber === 2) {
+      return item.obj.map((o) => o[property]) || [];
+    }
+
+    if (stepNumber === 3) {
+      const nestedItem = item.obj.find(
+        (o) => o.nestedName === previousSelection
+      );
+      return nestedItem ? nestedItem[property] : [];
+    }
+
+    return [];
   };
 
   const allStepsCompleted = Object.values(formData).every(
@@ -95,13 +138,7 @@ const MultiStepForm: React.FC = () => {
           value={formData.step2}
           onChange={handleInputChange}
           disabled={!formData.step1}
-          options={
-            formData.step1
-              ? jsArray
-                  .find((item) => item.name === formData.step1)
-                  ?.obj.map((o) => o.nestedName) || []
-              : []
-          }
+          options={getOptions(2, formData.step1, "nestedName")}
         />
 
         <Step
@@ -109,14 +146,7 @@ const MultiStepForm: React.FC = () => {
           value={formData.step3}
           onChange={handleInputChange}
           disabled={!formData.step2}
-          options={
-            formData.step2
-              ? jsArray
-                  .find((item) => item.name === formData.step1)
-                  ?.obj.find((o) => o.nestedName === formData.step2)?.times ||
-                []
-              : []
-          }
+          options={getOptions(3, formData.step2, "times")}
         />
 
         {allStepsCompleted && (
